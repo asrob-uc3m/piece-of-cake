@@ -1,3 +1,6 @@
+//PIECE OF CAKE 
+//CÓDIGO PARA SIGUELINEAS
+
 #include <QTRSensors.h>
 #define NUM_SENSORS   8     // numero de sensores usados
 #define TIMEOUT       2500  // esperar 2.5 ms para tener una respuesta del sensado
@@ -5,12 +8,16 @@
   
 // Conexiones
 int pwma = 3;
+int pwmb = 5;
 int ai1 = 2;
 int ai2 = 4;
+int bi1 = 7;
+int bi2 = 8;
+int interruptor = 9;  //Interruptor para comprobar el carril
 QTRSensorsRC qtrrc((unsigned char[]) {19, 18, 17, 16, 15, 14, 11, 12},
   NUM_SENSORS, TIMEOUT, EMITTER_PIN); 
 unsigned int sensorValues[NUM_SENSORS];
-  
+void pieceofcake(int option);
 
  
 // Inicialización
@@ -18,7 +25,11 @@ void setup() {
   pinMode(pwma,OUTPUT); 
   pinMode(ai1,OUTPUT);
   pinMode(ai2,OUTPUT); 
-  analogWrite(pwma,200);
+  pinMode(pwmb,OUTPUT); 
+  pinMode(bi1,OUTPUT);
+  pinMode(bi2,OUTPUT);
+  pinMode(interruptor, INPUT_PULLUP);    
+  //attachInterrupt(digitalPinToInterrupt(intPin), obstaculo, RISING);  //Interrupcion para cambiar de carril
 
   delay(500);
   pinMode(13, OUTPUT);        
@@ -50,6 +61,9 @@ void setup() {
 
   
 }
+
+
+
  
 // Rutina
 void loop() {
@@ -57,7 +71,9 @@ void loop() {
   // To get raw sensor values, call:
   //  qtrrc.read(sensorValues); instead of unsigned int position = qtrrc.readLine(sensorValues);
   unsigned int position = qtrrc.readLine(sensorValues);
-  
+  int carril=digitalRead(interruptor);
+  //Carril = 1 -> Izquierda
+  //Carril = 2 -> Derecha
   // print the sensor values as numbers from 0 to 1000, where 0 means maximum reflectance and
   // 1000 means minimum reflectance, followed by the line position
   for (unsigned char i = 0; i < NUM_SENSORS; i++)
@@ -67,14 +83,23 @@ void loop() {
   }
   Serial.println(); // uncomment this line if you are using raw values
   //Serial.println(position); // comment this line out if you are using raw values
-    if (sensorValues[0]<300 && sensorValues[1]<300 && sensorValues[2]<300 && sensorValues[3]<300 && sensorValues[4]>300 && sensorValues[5]>300 && sensorValues[6]>300 && sensorValues[7]>300){
-      digitalWrite(ai1,HIGH);
-      digitalWrite(ai2,LOW);
+  
+    
+    if (sensorValues[0]>400 && sensorValues[1]>400 && sensorValues[2]>400 && sensorValues[3]<400 && sensorValues[4]<400 && sensorValues[5]>400 && sensorValues[6]>400 && sensorValues[7]>400){
+      pieceofcake(1);
+    }else if (sensorValues[0]>400 && sensorValues[1]>400 && sensorValues[2]>400 && sensorValues[3]>400 && sensorValues[4]<400 && sensorValues[5]<400 && sensorValues[6]>400 && sensorValues[7]>400){
+      pieceofcake(2);
+    }else if (sensorValues[0]>400 && sensorValues[1]>400 && sensorValues[2]>400 && sensorValues[3]>400 && sensorValues[4]>400 && sensorValues[5]<400 && sensorValues[6]<400 && sensorValues[7]>400){
+      pieceofcake(3);
+    }else if (sensorValues[0]>400 && sensorValues[1]>400 && sensorValues[2]>400 && sensorValues[3]<400 && sensorValues[4]<400 && sensorValues[5]>400 && sensorValues[6]<400 && sensorValues[7]<400){
+      pieceofcake(4);
+    }else if(sensorValues[0]>400 && sensorValues[1]>400 && sensorValues[2]<400 && sensorValues[3]<400 && sensorValues[4]>400 && sensorValues[5]>400 && sensorValues[6]>400 && sensorValues[7]>400){
+      pieceofcake(5);
+    }else if(sensorValues[0]>400 && sensorValues[1]<400 && sensorValues[2]<400 && sensorValues[3]>400 && sensorValues[4]>400 && sensorValues[5]>400 && sensorValues[6]>400 && sensorValues[7]>400){
+      pieceofcake(6);
+    }else if(sensorValues[0]<400 && sensorValues[1]<400 && sensorValues[2]>400 && sensorValues[3]>400 && sensorValues[4]>400 && sensorValues[5]>400 && sensorValues[6]>400 && sensorValues[7]>400){
+      pieceofcake(7);
     }
-     else {
-       digitalWrite(ai1,LOW);
-       digitalWrite(ai2,HIGH);
-     }
 
     
   delay(50);
@@ -82,3 +107,76 @@ void loop() {
   
  
 }
+
+//1. Recto 
+//2. Izda leve
+//3. Izda medio
+//4. Izda max
+//5. Dcha leve
+//6. Dcha medio
+//7. Dcha max
+
+void pieceofcake(int option){
+switch (option){
+  case 1:
+      analogWrite(pwma,255);
+      analogWrite(pwmb,255);
+      digitalWrite(ai1,HIGH);
+      digitalWrite(ai2,LOW);
+      digitalWrite(bi1,HIGH);
+      digitalWrite(bi2,LOW);
+      break;
+  case 2:
+      analogWrite(pwma,125);
+      analogWrite(pwmb,255);
+      digitalWrite(ai1,HIGH);
+      digitalWrite(ai2,LOW);
+      digitalWrite(bi1,HIGH);
+      digitalWrite(bi2,LOW);
+      break;
+  case 3:
+      analogWrite(pwma,50);
+      analogWrite(pwmb,255);
+      digitalWrite(ai1,HIGH);
+      digitalWrite(ai2,LOW);
+      digitalWrite(bi1,HIGH);
+      digitalWrite(bi2,LOW);
+      break;
+  case 4:
+      analogWrite(pwma,50);
+      analogWrite(pwmb,255);
+      digitalWrite(ai1,LOW);
+      digitalWrite(ai2,HIGH);
+      digitalWrite(bi1,HIGH);
+      digitalWrite(bi2,LOW);
+      break;
+  case 5:
+      analogWrite(pwma,255);
+      analogWrite(pwmb,125);
+      digitalWrite(ai1,HIGH);
+      digitalWrite(ai2,LOW);
+      digitalWrite(bi1,HIGH);
+      digitalWrite(bi2,LOW);
+      break;
+  case 6:
+      analogWrite(pwma,255);
+      analogWrite(pwmb,50);
+      digitalWrite(ai1,HIGH);
+      digitalWrite(ai2,LOW);
+      digitalWrite(bi1,HIGH);
+      digitalWrite(bi2,LOW);
+      break;
+  case 7:
+      analogWrite(pwma,255);
+      analogWrite(pwmb,50);
+      digitalWrite(ai1,HIGH);
+      digitalWrite(ai2,LOW);
+      digitalWrite(bi1,LOW);
+      digitalWrite(bi2,HIGH);
+      break;
+}
+}
+void obstaculo(){
+  
+}
+
