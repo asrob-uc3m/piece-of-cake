@@ -13,12 +13,14 @@ int ai1 = 2;
 int ai2 = 4;
 int bi1 = 7;
 int bi2 = 8;
+int sensorfrontal=10;
 int interruptor = 9;  //Interruptor para comprobar el carril
+int carril;
 QTRSensorsRC qtrrc((unsigned char[]) {19, 18, 17, 16, 15, 14, 11, 12},
   NUM_SENSORS, TIMEOUT, EMITTER_PIN); 
 unsigned int sensorValues[NUM_SENSORS];
 void pieceofcake(int option);
-
+void obstaculo();
  
 // Inicialización
 void setup() {
@@ -29,7 +31,10 @@ void setup() {
   pinMode(bi1,OUTPUT);
   pinMode(bi2,OUTPUT);
   pinMode(interruptor, INPUT_PULLUP);    
-  //attachInterrupt(digitalPinToInterrupt(intPin), obstaculo, RISING);  //Interrupcion para cambiar de carril
+  carril=digitalRead(interruptor);
+  //Carril = 1 -> Izquierda
+  //Carril = 0 -> Derecha
+  attachInterrupt(digitalPinToInterrupt(sensorfrontal), obstaculo, RISING);  //Interrupcion para cambiar de carril
 
   delay(500);
   pinMode(13, OUTPUT);        
@@ -71,9 +76,8 @@ void loop() {
   // To get raw sensor values, call:
   //  qtrrc.read(sensorValues); instead of unsigned int position = qtrrc.readLine(sensorValues);
   unsigned int position = qtrrc.readLine(sensorValues);
-  int carril=digitalRead(interruptor);
-  //Carril = 1 -> Izquierda
-  //Carril = 2 -> Derecha
+  
+
   // print the sensor values as numbers from 0 to 1000, where 0 means maximum reflectance and
   // 1000 means minimum reflectance, followed by the line position
   for (unsigned char i = 0; i < NUM_SENSORS; i++)
@@ -177,6 +181,27 @@ switch (option){
 }
 }
 void obstaculo(){
-  
+  if (carril==0){
+    //Mover al carril izquierdo
+    do{
+      analogWrite(pwma,150);
+      analogWrite(pwmb,255);
+      digitalWrite(ai1,LOW);
+      digitalWrite(ai2,HIGH);
+      digitalWrite(bi1,HIGH);
+      digitalWrite(bi2,LOW);
+    }while(sensorValues[3]>400 && sensorValues[4]>400);
+    carril = !carril;
+  }else if (carril==1){
+     do{
+      analogWrite(pwma,255);
+      analogWrite(pwmb,150);
+      digitalWrite(ai1,HIGH);
+      digitalWrite(ai2,LOW);
+      digitalWrite(bi1,LOW);
+      digitalWrite(bi2,HIGH);
+    }while(sensorValues[3]>400 && sensorValues[4]>400);
+    carril = !carril;    
+  }
 }
 
